@@ -8,13 +8,78 @@
 
 import UIKit
 import Parse
+import MapKit
 
-class MotoristaTableViewController: UITableViewController {
+@available(iOS 8.0, *)
+class MotoristaTableViewController: UITableViewController, CLLocationManagerDelegate {
 
+    var usernames = [String]()
+    var locations = [CLLocationCoordinate2D]()
+    var distances = [CLLocationDistance]()
+    
+    var latitude: CLLocationDegrees = 0
+    var longitude: CLLocationDegrees = 0
+    var locationManager: CLLocationManager!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
 
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        let location:CLLocationCoordinate2D = manager.location!.coordinate
+        
+        latitude = location.latitude
+        longitude = location.longitude
+        
+        let query = PFQuery(className: "passageiroRequest")
+        query.whereKey("location", nearGeoPoint: PFGeoPoint(latitude: location.latitude, longitude: location.longitude))
+        
+        query.findObjectsInBackgroundWithBlock { (objects: [PFObject]?, error) in
+            
+            if error == nil {
+            
+                if let objects = objects {
+                    
+                    self.usernames.removeAll()
+                    self.locations.removeAll()
+                    
+                    for object in objects {
+                        
+                        if let username = object["username"] as? String {
+                            
+                            self.usernames.append(username)
+                        }
+                        
+                        if let locationRetorno = object["location"] as? PFGeoPoint {
+                            
+                            let requestLocation = CLLocationCoordinate2DMake(locationRetorno.latitude, locationRetorno.longitude)
+                            self.locations.append(requestLocation)
+                            
+                            let requestCLLocation = CLLocation(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
+                            let driverLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
+                            
+                            let distance = driverLocation.distanceFromLocation(requestCLLocation)
+                            
+                            self.distances.append(distance / 1000)
+                        }
+                    }
+                    
+                    self.tableView.reloadData()
+                }
+            } else {
+                
+                print("error")
+            }
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -24,7 +89,16 @@ class MotoristaTableViewController: UITableViewController {
         if segue.identifier == "logoutMotorista" {
             navigationController?.navigationBar.hidden = true
             PFUser.logOut()
+            
+        } else if segue.identifier == "showViewRequest" {
+            
+            if let destination = segue.destinationViewController as? RequestViewController {
+                
+                destination.requestLocation = locations[(tableView.indexPathForSelectedRow?.row)!]
+                destination.requestUsername = usernames[(tableView.indexPathForSelectedRow?.row)!]
+            }
         }
+        
     }
     // MARK: - Table view data source
 
@@ -35,13 +109,15 @@ class MotoristaTableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 3
+        return usernames.count
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
 
-        cell.textLabel?.text = "Teste"
+        let distanceDouble = Double(distances[indexPath.row])
+        let roundedDistance = Double(round(distanceDouble * 10) / 10)
+        cell.textLabel?.text = usernames[indexPath.row] + ": " + String(roundedDistance) + " Km distante"
 
         return cell
     }
