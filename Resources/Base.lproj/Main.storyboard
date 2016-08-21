@@ -280,10 +280,10 @@
                                 </constraints>
                             </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T2b-QI-I3i">
-                                <rect key="frame" x="234" y="356" width="133" height="30"/>
+                                <rect key="frame" x="20" y="356" width="560" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="MN8-D4-VxE"/>
-                                    <constraint firstAttribute="width" constant="133" id="y21-jh-ew0"/>
+                                    <constraint firstAttribute="width" constant="560" id="y21-jh-ew0"/>
                                 </constraints>
                                 <state key="normal" title="Atender passageiro"/>
                                 <connections>

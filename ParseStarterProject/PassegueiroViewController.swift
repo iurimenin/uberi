@@ -14,6 +14,7 @@ import MapKit
 class PassegueiroViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
 
     var passageiroChamouUber = false
+    var driverOnTheWay = false
     var latitude: CLLocationDegrees = 0
     var longitude: CLLocationDegrees = 0
     var locationManager: CLLocationManager!
@@ -85,22 +86,103 @@ class PassegueiroViewController: UIViewController, CLLocationManagerDelegate, MK
         let location:CLLocationCoordinate2D = manager.location!.coordinate
         //print("location = \(location.latitude) \(location.longitude)")
         
-        let center = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-        
-        self.map.setRegion(region, animated: true)
-        
-        self.map.removeAnnotations(map.annotations)
-        
-        let pinLocation = CLLocationCoordinate2DMake(location.latitude, location.longitude)
-        let pinAnotation = MKPointAnnotation()
-        pinAnotation.coordinate = pinLocation
-        pinAnotation.title = "Você está aqui"
-
-        self.map.addAnnotation(pinAnotation)
-        
         latitude = location.latitude
         longitude = location.longitude
+        
+        let query = PFQuery(className: "passageiroRequest")
+        query.whereKey("username", equalTo: PFUser.currentUser()!.username!)
+        
+        query.findObjectsInBackgroundWithBlock { (objects, error) in
+            
+            if error == nil {
+                
+                if let objects = objects {
+                    
+                    for object in objects {
+                     
+                        if let driverUsername = object["driverResponded"] {
+                            
+                            let driverQuery = PFQuery(className: "driverLocation")
+                            driverQuery.whereKey("username", equalTo: driverUsername)
+                            
+                            driverQuery.findObjectsInBackgroundWithBlock({ (objects, error) in
+                                
+                                if error == nil {
+                                    
+                                    if let objects = objects {
+                                        
+                                        for object in objects {
+                                            
+                                            if let driverLocation = object["driverLocation"] as? PFGeoPoint {
+                                                
+                                                let driverCLLocation = CLLocation(latitude: driverLocation.latitude, longitude: driverLocation.longitude)
+                                                let userCLLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
+                                                
+                                                let distanceMeters = userCLLocation.distanceFromLocation(driverCLLocation)
+                                                let distanceKm = distanceMeters / 1000
+                                                let roundDistance = Double(round(distanceKm * 10) / 10)
+                                                
+                                                self.callUberiButton.setTitle("\(driverUsername) a \(roundDistance)km", forState: .Normal)
+                                                self.driverOnTheWay = true
+                                                
+                                                let latDelta = abs(driverLocation.latitude - location.latitude) * 2 + 0.001
+                                                let lonDelta = abs(driverLocation.longitude - location.longitude) * 2 + 0.001
+                                                
+                                                let center = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                                                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta))
+                                                
+                                                self.map.setRegion(region, animated: true)
+                                                
+                                                self.map.removeAnnotations(self.map.annotations)
+                                                
+                                                let pinLocation = CLLocationCoordinate2DMake(location.latitude, location.longitude)
+                                                let pinAnotation = MKPointAnnotation()
+                                                pinAnotation.coordinate = pinLocation
+                                                pinAnotation.title = "Você"
+                                                
+                                                self.map.addAnnotation(pinAnotation)
+                                                
+                                                let pinLocationMotorista = CLLocationCoordinate2DMake(driverLocation.latitude, driverLocation.longitude)
+                                                let pinAnotationMotorista = MKPointAnnotation()
+                                                pinAnotationMotorista.coordinate = pinLocationMotorista
+                                                pinAnotationMotorista.title = "Seu Motorista"
+                                                
+                                                self.map.addAnnotation(pinAnotationMotorista)
+                                            }
+                                        }
+                                    }
+                                    
+                                } else {
+                                    
+                                    print(error)
+                                }
+                            })
+                        }
+                    }
+                }
+                
+            } else {
+                
+                print(error)
+            }
+        }
+        
+        if self.driverOnTheWay == false {
+        
+            let center = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            
+            self.map.setRegion(region, animated: true)
+            
+            self.map.removeAnnotations(map.annotations)
+            
+            let pinLocation = CLLocationCoordinate2DMake(location.latitude, location.longitude)
+            let pinAnotation = MKPointAnnotation()
+            pinAnotation.coordinate = pinLocation
+            pinAnotation.title = "Você está aqui"
+
+            self.map.addAnnotation(pinAnotation)
+        }
     }
     
     override func didReceiveMemoryWarning() {

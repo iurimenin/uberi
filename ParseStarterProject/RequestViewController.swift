@@ -31,15 +31,19 @@ class RequestViewController: UIViewController, CLLocationManagerDelegate {
                     for object in objects {
                         
                         let responseQuey = PFQuery(className: "passageiroRequest")
-                        responseQuey.getObjectInBackgroundWithId(object.objectId!, block: { (object, error) in
+                        print(object.objectId!)
+                        responseQuey.getObjectInBackgroundWithId(object.objectId!, block: { (objectPassageiro, error) in
                             
                             if error != nil {
                                 
                                 print(error)
-                            } else if let object = object {
+                            } else if let objectPassageiro = objectPassageiro {
                                 
-                                object["driverResponded"] = PFUser.currentUser()!.username!
-                                object.saveInBackgroundWithBlock({ (sucesso, error) in
+                                print(objectPassageiro)
+                                print(PFUser.currentUser()!.username!)
+                                
+                                objectPassageiro["driverResponded"] = PFUser.currentUser()!.username!
+                                objectPassageiro.saveInBackgroundWithBlock({ (sucesso, error) in
                                     print(sucesso)
                                     print(error)
                                 })

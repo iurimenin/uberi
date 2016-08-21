@@ -26,6 +26,10 @@
 	<string>Precisamos da sua localizacao</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Gostaria de saber sempre onde você está</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>

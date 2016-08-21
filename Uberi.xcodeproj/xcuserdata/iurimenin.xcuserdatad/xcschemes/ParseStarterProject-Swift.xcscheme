@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "81BA81441A49DA1800E65899"
                BuildableName = "Uberi.app"
-               BlueprintName = "ParseStarterProject-Swift"
-               ReferencedContainer = "container:ParseStarterProject-Swift.xcodeproj">
+               BlueprintName = "Uberi"
+               ReferencedContainer = "container:Uberi.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,8 +34,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "81BA81441A49DA1800E65899"
             BuildableName = "Uberi.app"
-            BlueprintName = "ParseStarterProject-Swift"
-            ReferencedContainer = "container:ParseStarterProject-Swift.xcodeproj">
+            BlueprintName = "Uberi"
+            ReferencedContainer = "container:Uberi.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -57,8 +57,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "81BA81441A49DA1800E65899"
             BuildableName = "Uberi.app"
-            BlueprintName = "ParseStarterProject-Swift"
-            ReferencedContainer = "container:ParseStarterProject-Swift.xcodeproj">
+            BlueprintName = "Uberi"
+            ReferencedContainer = "container:Uberi.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -76,8 +76,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "81BA81441A49DA1800E65899"
             BuildableName = "Uberi.app"
-            BlueprintName = "ParseStarterProject-Swift"
-            ReferencedContainer = "container:ParseStarterProject-Swift.xcodeproj">
+            BlueprintName = "Uberi"
+            ReferencedContainer = "container:Uberi.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -27,7 +27,7 @@ class MotoristaTableViewController: UITableViewController, CLLocationManagerDele
         locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestAlwaysAuthorization()
         locationManager.startUpdatingLocation()
     }
 
@@ -37,6 +37,47 @@ class MotoristaTableViewController: UITableViewController, CLLocationManagerDele
         
         latitude = location.latitude
         longitude = location.longitude
+        
+        let driverQuery = PFQuery(className: "driverLocation")
+        driverQuery.whereKey("username", equalTo: PFUser.currentUser()!.username!)
+        driverQuery.findObjectsInBackgroundWithBlock { (objects, error) in
+            
+            if error == nil {
+                
+                if let objects = objects {
+                    
+                    if objects.count > 0 {
+                        
+                        for object in objects {
+                            
+                            let query = PFQuery(className: "driverLocation")
+                            query.getObjectInBackgroundWithId(object.objectId!, block: { (obj, error) in
+                                
+                                if error != nil {
+                                    print(error)
+                                } else {
+                                    
+                                    if let object = obj {
+                                        
+                                        object["driverLocation"] = PFGeoPoint(latitude: location.latitude, longitude: location.longitude)
+                                        object.saveInBackground()
+                                    }
+                                }
+                            })
+                        }
+                    } else {
+                       
+                        let driverLocation = PFObject(className: "driverLocation")
+                        driverLocation["username"] = PFUser.currentUser()?.username
+                        driverLocation["driverLocation"] = PFGeoPoint(latitude: location.latitude, longitude: location.longitude)
+                        driverLocation.saveInBackground()
+                    }
+                }
+            } else {
+                
+                print(error)
+            }
+        }
         
         let query = PFQuery(className: "passageiroRequest")
         query.whereKey("location", nearGeoPoint: PFGeoPoint(latitude: location.latitude, longitude: location.longitude))
